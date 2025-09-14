@@ -1,7 +1,17 @@
 :root {
-  --primary-color: #ffc400;
+  --primary-color: #ff9854;
+
+  --van-search-left-icon-color: #ff9854 !important;
 }
 
 body {
   background-color: #fff;
+}
+
+.top_page {
+  height: 100vh;
+  overflow-y: scroll;
+  background-color: #fff;
+  position: relative;
+  z-index: 9;
 }

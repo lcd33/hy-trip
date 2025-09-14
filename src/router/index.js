@@ -23,9 +23,19 @@ const routes = [
   {
     name: 'message',
     path: '/message',
-    component: () => import('@/views/message/Message.vue')
+    component: () => import('@/views/message/Message.vue'),
+
   },
+  {
+    name: 'city',
+    path: '/city',
+    component: () => import('@/views/city/City.vue'),
+    meta: {
+      hide: true
+    }
+  }
 ]
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: routes
