@@ -13,20 +13,25 @@
 <script setup>
 import tabbarData from '@/assets/data/tabbar';
 
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { onUnmounted, ref, watch } from 'vue';
 
 import loaderImage from '@/utils/loadImage';
 
-import { onUnmounted, ref } from 'vue';
-
 const router = useRouter();
+const route = useRoute();
 const currentIndex = ref(0); // 当前所在位置
 
+watch(() => route.path, (newPath) => {
+  // 路由变化时，更新当前所在位置
+  const index = tabbarData.findIndex(item => item.path === newPath);
+  if (index !== -1) {
+    currentIndex.value = index;
+  }
+})
 // 获取当前所在位置条抓路由
-const handleClick = (item, index) => {
+const handleClick = (item) => {
   router.push(item.path);
-  currentIndex.value = index;
-  console.log(currentIndex.value);
 }
 
 onUnmounted(() => {

@@ -33,6 +33,22 @@ const routes = [
     meta: {
       hide: true
     }
+  },
+  {
+    name: 'search',
+    path: '/search',
+    component: () => import('@/views/search/Search.vue'),
+    meta: {
+      hide: true
+    }
+  },
+  {
+    name: 'detail',
+    path: '/detail/:houseId',
+    component: () => import('@/views/detail/Detaille.vue'),
+    meta: {
+      hide: true
+    }
   }
 ]
 

@@ -9,35 +9,59 @@
       </div>
     </div>
     <!-- 日期时间 -->
-    <div class="time-container" @click="calendarShow = true">
+    <div class="time-container section" @click="calendarShow = true">
       <div class="stand">
         <span class="tip">入住</span>
-        <div class="time">{{ startTime }}</div>
+        <div class="time">{{ startTimeStr }}</div>
       </div>
       <div class="stay">共 {{ totalNight }} 晚</div>
       <div class="stand">
         <span class="tip">离开</span>
-        <div class="time">{{ endTime }}</div>
+        <div class="time">{{ endTimeStr }}</div>
       </div>
     </div>
     <van-calendar v-model:show="calendarShow" :round="false" color="var(--primary-color)" type="range"
       :formatter="formatter" @confirm="onConfirm" />
+    <!-- 筛选 -->
+    <div class="text-conteiner section">
+      <span>经费不限</span>
+      <span>人数不限</span>
+    </div>
+    <!-- 文本展示 -->
+    <div class="show-search section">关键词/位置/民宿</div>
+    <!-- 搜索 -->
+    <div class="search section">
+      <template v-for="(item, index) in hotSuggests" :key="index">
+        <div class="item" :style="{ color: item.tagText?.textColor, background: item.tagText.background.color }">
+          {{ item.tagText?.text }}
+        </div>
+      </template>
+    </div>
+    <!-- 点击搜索 -->
+    <div class="search-bth" @click="searchClick">
+      开始搜索
+    </div>
+
   </div>
 </template>
 
 <script setup>
+
+
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import useCityStore from '@/stores/moudule/city'
-import { fordateDate } from '@/utils/fordata-date'
+import useHomeStore from '@/stores/moudule/home.js'
+import { fordateDate, fordateDay } from '@/utils/fordata-date'
 
 
 const router = useRouter();
 const cityStore = useCityStore()
+const homeStore = useHomeStore()
 const { currentCity } = storeToRefs(cityStore)
-
+const { hotSuggests } = storeToRefs(homeStore)
 // 位置点击
 function positionClick() {
   navigator.geolocation.getCurrentPosition(res => {
@@ -58,12 +82,14 @@ function gotoCity() {
   })
 }
 
-const startTime = ref('')
-const endTime = ref('')
+import  useMainStore  from '@/stores/moudule/mainStore.js'
+const mainStore = useMainStore()
+const { startTime, endTime } = storeToRefs(mainStore)
 const totalNight = ref(1) // 总天数
-startTime.value = fordateDate(new Date())
-endTime.value = fordateDate(new Date().setDate(new Date().getDate() + 1))
-const calendarShow = ref(true) //日历显示
+const startTimeStr = computed(() => fordateDate(startTime.value))
+const endTimeStr = computed(() => fordateDate(endTime.value))
+const calendarShow = ref(false) //日历显示
+// 日期格式化
 const formatter = (day) => {
   if (day.type === 'start') {
     day.bottomInfo = '入住';
@@ -75,19 +101,39 @@ const formatter = (day) => {
 // 确认选择
 function onConfirm(days) {
   // 设置日期
-  console.log(days)
   if (days.length === 2) {
-    startTime.value = fordateDate(days[0])
-    endTime.value = fordateDate(days[1])
+    startTime.value = days[0]
+    endTime.value = days[1]
     // 计算天数
+    totalNight.value = fordateDay(days[0], days[1])
   }
   // 隐藏日历
   calendarShow.value = false
   // 计算天数
 }
+
+// 搜索点击
+function searchClick() {
+  router.push({
+    path: '/search',
+    query: {
+      cityName: currentCity.value.cityName,
+      startTime: startTime.value,
+      endTime: endTime.value,
+    }
+  })
+}
+
 </script>
 
 <style lang="scss" scoped>
+.section {
+  display: flex;
+
+  align-items: center;
+  padding: 10px 0;
+}
+
 .home-search {
   padding: 0 20px;
 
@@ -122,9 +168,7 @@ function onConfirm(days) {
   }
 
   .time-container {
-    display: flex;
     justify-content: space-between;
-    padding: 10px 0;
 
     .stand {
       display: flex;
@@ -152,6 +196,47 @@ function onConfirm(days) {
       justify-self: center;
       color: #a7a4a4;
     }
+  }
+
+  .text-conteiner {
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .show-search {
+    font-size: 16px;
+    font-weight: 500;
+    color: #adacac;
+  }
+
+  .search {
+    margin-top: 10px 0;
+    flex-flow: wrap;
+
+    .item {
+      padding: 4px 8px;
+      margin: 8px 6px;
+      background-color: #f5f5f5;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+
+  .search-bth {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    line-height: 40px;
+    text-align: center;
+    border-radius: 18px;
+    font-weight: 500;
+    background: var(--them--linear--gradient);
+    color: #fff;
   }
 }
 </style>
